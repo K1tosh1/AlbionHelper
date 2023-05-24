@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from category_file_handler import process_category
+from server_handler import process_server
 import os
 
 
@@ -9,19 +10,15 @@ class App(ctk.CTk):
 
         self.title("Albion Helper")
 
-        # Получение размеров экрана
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
-        # Вычисление размеров окна
         window_width = int(screen_width * 0.9)
         window_height = int(screen_height * 0.9)
 
-        # Вычисление координат для центрирования окна
         x = int((screen_width - window_width) / 2)
         y = int((screen_height - window_height) / 2)
 
-        # Установка размеров и позиции окна
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
         self.sidemenu = ctk.CTkFrame(self, border_width=1)
@@ -81,172 +78,61 @@ class App(ctk.CTk):
         self.category = ctk.CTkLabel(self.menu, text="Category")
         self.category.grid(row=8, column=0, padx=10, pady=1)
 
-        self.category_cmb = ctk.CTkComboBox(self.menu, state="readonly", values=["Animal Skinner Tomes",
-                                                                                 "Any",
-                                                                                 "Arcane Staff",
-                                                                                 "Arena Sigil",
-                                                                                 "Armored Horse",
-                                                                                 "Artifact Armor",
-                                                                                 "Artifact Magic",
-                                                                                 "Bag",
-                                                                                 "Battle Mount",
-                                                                                 "Bridgewatch",
-                                                                                 "Caerleon",
-                                                                                 "Cape",
-                                                                                 "City Resource",
-                                                                                 "Cloth Armor",
-                                                                                 "Cloth Helmet",
-                                                                                 "Cloth Shoes",
-                                                                                 "Consumable Cooked",
-                                                                                 "Consumable Fish",
-                                                                                 "Consumable Fishing Bait",
-                                                                                 "Consumable Map",
-                                                                                 "Consumable Potion",
-                                                                                 "Consumable Vanity",
-                                                                                 "Consumable Victory Emotes",
-                                                                                 "Crossbow",
-                                                                                 "Cursed Staff",
-                                                                                 "Demolition Hammer",
-                                                                                 "Direbear",
-                                                                                 "Direboar",
-                                                                                 "Direwolf",
-                                                                                 "Event",
-                                                                                 "Farmable Animal",
-                                                                                 "Farmable Seed",
-                                                                                 "Farming Journals",
-                                                                                 "Fiber Harvester Tomes",
-                                                                                 "Fiber Trophy",
-                                                                                 "Fire Staff",
-                                                                                 "Fisherman Backpack",
-                                                                                 "Fisherman Boots",
-                                                                                 "Fisherman Cape",
-                                                                                 "Fisherman Garb",
-                                                                                 "Fishing Rod",
-                                                                                 "Fishing Trophy",
-                                                                                 "Fort Sterling",
-                                                                                 "Frost Staff",
-                                                                                 "Furniture Banner",
-                                                                                 "Furniture Bed",
-                                                                                 "Furniture Chest",
-                                                                                 "Furniture Decoration",
-                                                                                 "Furniture Flag",
-                                                                                 "Furniture Heretic",
-                                                                                 "Furniture Keeper",
-                                                                                 "Furniture Morgana",
-                                                                                 "Furniture Repair Kit",
-                                                                                 "Furniture Table",
-                                                                                 "Furniture Unique",
-                                                                                 "General Trophy",
-                                                                                 "Harvester Backpack",
-                                                                                 "Harvester Cap",
-                                                                                 "Harvester Garb",
-                                                                                 "Harvester Workboots",
-                                                                                 "Hide Trophy",
-                                                                                 "Holy Staff",
-                                                                                 "Leather Armor",
-                                                                                 "Leather Helmet",
-                                                                                 "Leather Shoes",
-                                                                                 "Lumberjack Backpack",
-                                                                                 "Lumberjack Cap",
-                                                                                 "Lumberjack Garb",
-                                                                                 "Lumberjack Tomes",
-                                                                                 "Lumberjack Workboots",
-                                                                                 "Lymhurst",
-                                                                                 "Map",
-                                                                                 "Martlock",
-                                                                                 "Material Essence",
-                                                                                 "Material Other",
-                                                                                 "Material Relic",
-                                                                                 "Material Rune",
-                                                                                 "Material Soul",
-                                                                                 "Melee Artefact",
-                                                                                 "Melee Axe",
-                                                                                 "Melee Dagger",
-                                                                                 "Melee Hammer",
-                                                                                 "Melee Mace",
-                                                                                 "Melee Quarterstaff",
-                                                                                 "Melee Spear",
-                                                                                 "Melee Sword",
-                                                                                 "Melee War Glowes",
-                                                                                 "Mercenary Trophy",
-                                                                                 "Miner Backpack",
-                                                                                 "Miner Cap",
-                                                                                 "Miner Garb",
-                                                                                 "Miner Workboots",
-                                                                                 "Mule",
-                                                                                 "Nature Staff",
-                                                                                 "Offhand Artifact",
-                                                                                 "Off-Hand Book",
-                                                                                 "Off-Hand Horn",
-                                                                                 "Off-Hand Orb",
-                                                                                 "Off-Hand Shield",
-                                                                                 "Off-Hand Torch",
-                                                                                 "Off-Hand Totem",
-                                                                                 "Ore Miner Tomes",
-                                                                                 "Ore Trophy",
-                                                                                 "Other Artifact",
-                                                                                 "Ox",
-                                                                                 "Pickaxe",
-                                                                                 "Plate Armor",
-                                                                                 "Plate Helmet",
-                                                                                 "Plate Shoes",
-                                                                                 "Product Animal",
-                                                                                 "Product Cooked",
-                                                                                 "Product Farming",
-                                                                                 "Quarrier Backpack",
-                                                                                 "Quarrier Cap",
-                                                                                 "Quarrier Garb",
-                                                                                 "Quarrier Tomes",
-                                                                                 "Quarrier Workboots",
-                                                                                 "Ranged Artifact",
-                                                                                 "Ranged Bow",
-                                                                                 "Rare Mount",
-                                                                                 "Resource Cloth",
-                                                                                 "Resource Fiber",
-                                                                                 "Resource Hide",
-                                                                                 "Resource Leather",
-                                                                                 "Resource Metalbar",
-                                                                                 "Resource Ore",
-                                                                                 "Resource Other",
-                                                                                 "Resource Planks",
-                                                                                 "Resource Stone Block",
-                                                                                 "Resource Stone",
-                                                                                 "Resource Wood",
-                                                                                 "Riding Horse",
-                                                                                 "Royal Sigils",
-                                                                                 "Sickle",
-                                                                                 "Skinner Garb",
-                                                                                 "Skinner Backpack",
-                                                                                 "Skinner Cap",
-                                                                                 "Skinner Workboots",
-                                                                                 "Skinning Knife",
-                                                                                 "Stag and Mose",
-                                                                                 "Stone Hammer",
-                                                                                 "Stone Trophy",
-                                                                                 "Swamp Dragon",
-                                                                                 "Swiftclaw",
-                                                                                 "Thetford",
-                                                                                 "Tome Of Insight",
-                                                                                 "Wood Axe",
-                                                                                 "Wood Trophy"])
+        self.category_cmb = ctk.CTkComboBox(self.menu, state="readonly", values=["Animal Skinner Tomes","Any","Arcane Staff",
+                                                                                 "Arena Sigil","Armored Horse","Artifact Armor","Artifact Magic",
+                                                                                 "Bag","Battle Mount","Bridgewatch","Caerleon","Cape","City Resource",
+                                                                                 "Cloth Armor","Cloth Helmet","Cloth Shoes","Consumable Cooked","Consumable Fish",
+                                                                                 "Consumable Fishing Bait","Consumable Map","Consumable Potion","Consumable Vanity",
+                                                                                 "Consumable Victory Emotes","Crossbow","Cursed Staff","Demolition Hammer","Direbear",
+                                                                                 "Direboar","Direwolf","Event","Farmable Animal","Farmable Seed","Farming Journals",
+                                                                                 "Fiber Harvester Tomes","Fiber Trophy","Fire Staff","Fisherman Backpack","Fisherman Boots",
+                                                                                 "Fisherman Cape","Fisherman Garb","Fishing Rod","Fishing Trophy","Fort Sterling","Frost Staff",
+                                                                                 "Furniture Banner","Furniture Bed","Furniture Chest","Furniture Decoration","Furniture Flag","Furniture Heretic",
+                                                                                 "Furniture Keeper","Furniture Morgana","Furniture Repair Kit","Furniture Table","Furniture Unique",
+                                                                                 "General Trophy","Harvester Backpack","Harvester Cap","Harvester Garb","Harvester Workboots","Hide Trophy",
+                                                                                 "Holy Staff","Leather Armor","Leather Helmet","Leather Shoes","Lumberjack Backpack","Lumberjack Cap",
+                                                                                 "Lumberjack Garb","Lumberjack Tomes","Lumberjack Workboots","Lymhurst","Map","Martlock","Material Essence",
+                                                                                 "Material Other","Material Relic","Material Rune","Material Soul","Melee Artefact","Melee Axe",
+                                                                                 "Melee Dagger","Melee Hammer","Melee Mace","Melee Quarterstaff","Melee Spear","Melee Sword","Melee War Glowes",
+                                                                                 "Mercenary Trophy","Miner Backpack","Miner Cap","Miner Garb","Miner Workboots","Mule","Nature Staff",
+                                                                                 "Offhand Artifact","Off-Hand Book","Off-Hand Horn","Off-Hand Orb","Off-Hand Shield","Off-Hand Torch",
+                                                                                 "Off-Hand Totem","Ore Miner Tomes","Ore Trophy","Other Artifact","Ox","Pickaxe","Plate Armor","Plate Helmet",
+                                                                                 "Plate Shoes","Product Animal","Product Cooked","Product Farming","Quarrier Backpack","Quarrier Cap",
+                                                                                 "Quarrier Garb","Quarrier Tomes","Quarrier Workboots","Ranged Artifact","Ranged Bow","Rare Mount",
+                                                                                 "Resource Cloth","Resource Fiber","Resource Hide","Resource Leather","Resource Metalbar","Resource Ore",
+                                                                                 "Resource Other","Resource Planks","Resource Stone Block","Resource Stone","Resource Wood",
+                                                                                 "Riding Horse","Royal Sigils","Sickle","Skinner Garb","Skinner Backpack","Skinner Cap","Skinner Workboots",
+                                                                                 "Skinning Knife","Stag and Mose","Stone Hammer","Stone Trophy","Swamp Dragon","Swiftclaw","Thetford",
+                                                                                 "Tome Of Insight","Wood Axe","Wood Trophy"])
         self.category_cmb.set("Bag")
         self.category_cmb.grid(row=9, column=0, padx=5, pady=10, sticky="nsew")
 
         self.itemlang = ctk.CTkLabel(self.menu, text="Item language")
         self.itemlang.grid(row=10, column=0, padx=10, pady=1)
 
-        self.itemlang_cmb = ctk.CTkComboBox(self.menu, state="readonly", values=["English", "Russian", "German", "French", "Italian", "Spanish", "Portuguese",])
+        self.itemlang_cmb = ctk.CTkComboBox(self.menu, state="readonly", values=["EN","DE","FR","RU","PL","ES","PT","IT","ZH","KO","JA","ZH","ID"])
         self.itemlang_cmb.set("English")
         self.itemlang_cmb.grid(row=11, column=0, padx=5, pady=10, sticky="nsew")
 
-        self.search_btn = ctk.CTkButton(self.menu, text="Search", command=self.save_settings)
+        self.search_btn = ctk.CTkButton(self.menu, text="Search", command=self.search_category)
         self.search_btn.grid(row=12, column=0, padx=10, pady=10, sticky="nsew")
 
-    def save_settings(self):
+    def premium(self, event=None):
+        premium_value = self.premium_cmb.get()
+        if premium_value == "Premium":
+            tax = 0.4
+        elif premium_value == "Non - Premium":
+            tax = 0.8
+
+    def search_category(self, event=None):
         category_value = self.category_cmb.get()
+        server_value = self.server_cmb.get()
+        server_value = process_server(server_value)
         category_data = process_category(category_value)
         if category_data:
             print("Содержимое категории:", category_data)
+            print("server_value:", server_value)
+
     def destroy_sidemenu(self):
         self.menu.grid_forget()
         self.menu.destroy()
