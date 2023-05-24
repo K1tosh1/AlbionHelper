@@ -2,6 +2,7 @@ import os
 
 def process_category(category):
         current_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = None
         if category == "Animal Skinner Tomes":
             file_path = os.path.join(current_dir,"category", "animal skinner tomes.txt")
         elif category == "Any":
@@ -304,4 +305,4 @@ def process_category(category):
                 data = file.read()
             return data
 
-        return ""
+        return category_data
