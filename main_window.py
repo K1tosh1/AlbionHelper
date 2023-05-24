@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from category_file_handler import process_category
 from server_handler import process_server
+import json
 import os
 
 
@@ -111,27 +112,73 @@ class App(ctk.CTk):
         self.itemlang.grid(row=10, column=0, padx=10, pady=1)
 
         self.itemlang_cmb = ctk.CTkComboBox(self.menu, state="readonly", values=["EN","DE","FR","RU","PL","ES","PT","IT","ZH","KO","JA","ZH","ID"])
-        self.itemlang_cmb.set("English")
+        self.itemlang_cmb.set("EN")
         self.itemlang_cmb.grid(row=11, column=0, padx=5, pady=10, sticky="nsew")
 
-        self.search_btn = ctk.CTkButton(self.menu, text="Search", command=self.search_category)
+        self.search_btn = ctk.CTkButton(self.menu, text="Search", command=self.search)
         self.search_btn.grid(row=12, column=0, padx=10, pady=10, sticky="nsew")
 
-    def premium(self, event=None):
-        premium_value = self.premium_cmb.get()
-        if premium_value == "Premium":
-            tax = 0.4
-        elif premium_value == "Non - Premium":
-            tax = 0.8
-
-    def search_category(self, event=None):
+    def search(self, event=None):
         category_value = self.category_cmb.get()
         server_value = self.server_cmb.get()
         server_value = process_server(server_value)
         category_data = process_category(category_value)
-        if category_data:
-            print("Содержимое категории:", category_data)
-            print("server_value:", server_value)
+        premium = premium_value = self.premium_cmb.get()
+        language = self.itemlang_cmb.get()
+        if premium_value == "Premium":
+            tax = 0.8
+        elif premium_value == "Non - Premium":
+            tax = 0.4
+
+        if language == "EN":
+            language = "EN-US"
+        elif language == "DE":
+            language = "DE-DE"
+        elif language =="FR":
+            language = "FR-FR"
+        elif language == "RU":
+            language = "RU-RU"
+        elif language == "PL":
+            language = "PL-PL"
+        elif language == "ES":
+            language = "ES-ES"
+        elif language == "PT":
+            language = "PT-PT"
+        elif language == "IT":
+            language = "IT-IT"
+        elif language == "ZH":
+            language = "ZH-CN"
+        elif language == "KO":
+            language = "KO-KR"
+        elif language == "JA":
+            language = "JA-JP"
+        elif language == "ID":
+            language = "ID-ID"
+        print(language)
+
+        current_directory = os.getcwd()
+        file_path = os.path.join(current_directory, "data.json")
+
+        try:
+            with open(file_path, 'r') as file:
+                data = json.load(file)
+            
+
+            for item in data:
+                if item['UniqueName'] == category_data:
+                    localized_names = item['LocalizedNames']
+                    if language in localized_names:
+                        localized_name = localized_names[language]
+                        print("Localized Name:", localized_name)
+                        # Сохраните значение localized_name для дальнейшей замены
+                        # после выполнения запроса
+                        break
+            else:
+                print("No matching category found in data.json")
+        except FileNotFoundError:
+            print("Файл не найден:", file_path)
+
+
 
     def destroy_sidemenu(self):
         self.menu.grid_forget()
