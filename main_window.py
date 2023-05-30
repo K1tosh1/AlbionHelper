@@ -101,24 +101,24 @@ class Albion_Helper(customtkinter.CTk):
         self.check_version()
 
     def check_version(self):
-        current_version = '1.0'
+        current_version = 1.0
         url = "https://raw.githubusercontent.com/K1tosh1/AlbionHelper/main/version.txt"
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                remote_version = response.text.strip()
-                if remote_version == current_version.strip():
-                    print("Версия установлена")
-                else:
-                    print("Обнаружена новая версия")
-                    msg = CTkMessagebox(title="Обновление", message="Мы нашли новую версию, вы хотите перейти на страницу загрузки?",
-                        icon="question", option_2="Да", option_1="Нет")
-                    response = msg.get()
-                    if response=="Да":
-                        webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
-                        app.destroy()       
+                remote_version = response.text
+                print(remote_version)
+                print(current_version)
+                if remote_version == current_version:
+                    print("Версия установлена")      
             else:
-                print("Не удалось получить версию по ссылке")
+                msg = CTkMessagebox(title="Обновление", message="Мы нашли новую версию, вы хотите перейти на страницу загрузки?",
+                icon="question", option_2="Да", option_1="Нет")
+                response = msg.get()
+                if response=="Да":
+                    webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
+                    app.destroy()
+
         except requests.exceptions.RequestException as e:
             print("Ошибка при выполнении запроса:", str(e))
         self.mainloop()
