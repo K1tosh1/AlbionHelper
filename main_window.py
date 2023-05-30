@@ -42,7 +42,7 @@ class Loader(customtkinter.CTk):
 
         progressbar.start()
 
-        self.after(3500, self.show_albion_helper)
+        self.after(4500, self.show_albion_helper)
 
     def show_albion_helper(self):
         self.destroy()
@@ -75,7 +75,7 @@ class Albion_Helper(customtkinter.CTk):
 
         label_category = customtkinter.CTkLabel(sidebar, text="Категория")
         label_category.grid(row=0, column=0)
-        category = customtkinter.CTkComboBox(sidebar, values=['Аксессуары','Броня'], state = 'readonly',command=self.get_category)
+        category = customtkinter.CTkComboBox(sidebar, values=['Аксессуары','Тканевая броня'], state = 'readonly',command=self.get_category)
         category.set(value="Выбери категорию")
         category.grid(row=2, column=0, pady=5,padx=5, sticky="nsew")
 
@@ -110,22 +110,19 @@ class Albion_Helper(customtkinter.CTk):
             if response.status_code == 200:
                 remote_version = response.text.strip()
                 if remote_version == current_version.strip():
-                    print("Версии совпадают")
+                    print("Версия установлена")
                 else:
-                    print("Версии не совпадают")
+                    print("Обнаружена новая версия")
                     msg = CTkMessagebox(title="Обновление", message="Мы нашли новую версию, вы хотите перейти на страницу загрузки?",
                         icon="question", option_2="Да", option_1="Нет")
                     response = msg.get()
                     if response=="Да":
                         webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
                         app.destroy()       
-                    else:
-                        print("Click 'Yes' to exit!")
             else:
                 print("Не удалось получить версию по ссылке")
         except requests.exceptions.RequestException as e:
             print("Ошибка при выполнении запроса:", str(e))
-
         self.mainloop()
     
     def get_server(self, value):
@@ -137,7 +134,6 @@ class Albion_Helper(customtkinter.CTk):
             url = "https://east.albion-online-data.com/api/v2/stats/prices/"
             self.url = url
         return url
-
 
     def get_category(self, value):
         self.selected_category = value
@@ -204,8 +200,58 @@ class Albion_Helper(customtkinter.CTk):
                         'T6_CAPEITEM_UNDEAD','T6_CAPEITEM_UNDEAD@1','T6_CAPEITEM_UNDEAD@2','T6_CAPEITEM_UNDEAD@3','T6_CAPEITEM_UNDEAD@4',
                         'T7_CAPEITEM_UNDEAD','T7_CAPEITEM_UNDEAD@1','T7_CAPEITEM_UNDEAD@2','T7_CAPEITEM_UNDEAD@3','T7_CAPEITEM_UNDEAD@4',
                         'T8_CAPEITEM_UNDEAD','T8_CAPEITEM_UNDEAD@1','T8_CAPEITEM_UNDEAD@2','T8_CAPEITEM_UNDEAD@3','T8_CAPEITEM_UNDEAD@4']
-        elif self.selected_category == "Броня":
-            item_ids = ['']
+        elif self.selected_category == "Тканевая броня":
+            item_ids = ['T2_ARMOR_CLOTH_SET1','T3_ARMOR_CLOTH_SET1','T4_ARMOR_CLOTH_SET1','T4_ARMOR_CLOTH_SET1@1','T4_ARMOR_CLOTH_SET1@2','T4_ARMOR_CLOTH_SET1@3','T4_ARMOR_CLOTH_SET1@4',
+                        'T5_ARMOR_CLOTH_SET1','T5_ARMOR_CLOTH_SET1@1','T5_ARMOR_CLOTH_SET1@2','T5_ARMOR_CLOTH_SET1@3','T5_ARMOR_CLOTH_SET1@4',
+                        'T6_ARMOR_CLOTH_SET1',' T6_ARMOR_CLOTH_SET1@1','T6_ARMOR_CLOTH_SET1@2','T6_ARMOR_CLOTH_SET1@3','T6_ARMOR_CLOTH_SET1@4',
+                        'T7_ARMOR_CLOTH_SET1','T7_ARMOR_CLOTH_SET1@1','T7_ARMOR_CLOTH_SET1@2','T7_ARMOR_CLOTH_SET1@3','T7_ARMOR_CLOTH_SET1@4',
+                        'T8_ARMOR_CLOTH_SET1','T8_ARMOR_CLOTH_SET1@1','T8_ARMOR_CLOTH_SET1@2','T8_ARMOR_CLOTH_SET1@3','T8_ARMOR_CLOTH_SET1@4',
+                        'T4_ARMOR_CLOTH_SET2','T4_ARMOR_CLOTH_SET2@1','T4_ARMOR_CLOTH_SET2@2','T4_ARMOR_CLOTH_SET2@3','T4_ARMOR_CLOTH_SET2@4',
+                        'T5_ARMOR_CLOTH_SET2','T5_ARMOR_CLOTH_SET2@1','T5_ARMOR_CLOTH_SET2@2','T5_ARMOR_CLOTH_SET2@3','T5_ARMOR_CLOTH_SET2@4',
+                        'T6_ARMOR_CLOTH_SET2','T6_ARMOR_CLOTH_SET2@1','T6_ARMOR_CLOTH_SET2@2','T6_ARMOR_CLOTH_SET2@3','T6_ARMOR_CLOTH_SET2@4',
+                        'T7_ARMOR_CLOTH_SET2','T7_ARMOR_CLOTH_SET2@1','T7_ARMOR_CLOTH_SET2@2','T7_ARMOR_CLOTH_SET2@3','T7_ARMOR_CLOTH_SET2@4',
+                        'T8_ARMOR_CLOTH_SET2','T8_ARMOR_CLOTH_SET2@1','T8_ARMOR_CLOTH_SET2@2','T8_ARMOR_CLOTH_SET2@3','T8_ARMOR_CLOTH_SET2@4',
+                        'T4_ARMOR_CLOTH_SET3','T4_ARMOR_CLOTH_SET3@1','T4_ARMOR_CLOTH_SET3@2','T4_ARMOR_CLOTH_SET3@3','T4_ARMOR_CLOTH_SET3@4',
+                        'T5_ARMOR_CLOTH_SET3','T5_ARMOR_CLOTH_SET3@1','T5_ARMOR_CLOTH_SET3@2','T5_ARMOR_CLOTH_SET3@3','T5_ARMOR_CLOTH_SET3@4',
+                        'T6_ARMOR_CLOTH_SET3','T6_ARMOR_CLOTH_SET3@1','T6_ARMOR_CLOTH_SET3@2','T6_ARMOR_CLOTH_SET3@3','T6_ARMOR_CLOTH_SET3@4',
+                        'T7_ARMOR_CLOTH_SET3','T7_ARMOR_CLOTH_SET3@1','T7_ARMOR_CLOTH_SET3@2','T7_ARMOR_CLOTH_SET3@3','T7_ARMOR_CLOTH_SET3@4',
+                        'T8_ARMOR_CLOTH_SET3','T8_ARMOR_CLOTH_SET3@1','T8_ARMOR_CLOTH_SET3@2','T8_ARMOR_CLOTH_SET3@3','T8_ARMOR_CLOTH_SET3@4',
+                        'T4_ARMOR_CLOTH_KEEPER','T4_ARMOR_CLOTH_KEEPER@1','T4_ARMOR_CLOTH_KEEPER@2','T4_ARMOR_CLOTH_KEEPER@3','T4_ARMOR_CLOTH_KEEPER@4',
+                        'T5_ARMOR_CLOTH_KEEPER','T5_ARMOR_CLOTH_KEEPER@1','T5_ARMOR_CLOTH_KEEPER@2','T5_ARMOR_CLOTH_KEEPER@3','T5_ARMOR_CLOTH_KEEPER@4',
+                        'T6_ARMOR_CLOTH_KEEPER','T6_ARMOR_CLOTH_KEEPER@1','T6_ARMOR_CLOTH_KEEPER@2','T6_ARMOR_CLOTH_KEEPER@3','T6_ARMOR_CLOTH_KEEPER@4',
+                        'T7_ARMOR_CLOTH_KEEPER','T7_ARMOR_CLOTH_KEEPER@1','T7_ARMOR_CLOTH_KEEPER@2','T7_ARMOR_CLOTH_KEEPER@3','T7_ARMOR_CLOTH_KEEPER@4',
+                        'T8_ARMOR_CLOTH_KEEPER','T8_ARMOR_CLOTH_KEEPER@1','T8_ARMOR_CLOTH_KEEPER@2','T8_ARMOR_CLOTH_KEEPER@3','T8_ARMOR_CLOTH_KEEPER@4',
+                        'T4_ARMOR_CLOTH_HELL','T4_ARMOR_CLOTH_HELL@1','T4_ARMOR_CLOTH_HELL@2','T4_ARMOR_CLOTH_HELL@3','T4_ARMOR_CLOTH_HELL@4',
+                        'T5_ARMOR_CLOTH_HELL','T5_ARMOR_CLOTH_HELL@1','T5_ARMOR_CLOTH_HELL@2','T5_ARMOR_CLOTH_HELL@3','T5_ARMOR_CLOTH_HELL@4',
+                        'T6_ARMOR_CLOTH_HELL','T6_ARMOR_CLOTH_HELL@1','T6_ARMOR_CLOTH_HELL@2','T6_ARMOR_CLOTH_HELL@3','T6_ARMOR_CLOTH_HELL@4',
+                        'T7_ARMOR_CLOTH_HELL','T7_ARMOR_CLOTH_HELL@1','T7_ARMOR_CLOTH_HELL@2','T7_ARMOR_CLOTH_HELL@3','T7_ARMOR_CLOTH_HELL@4',
+                        'T8_ARMOR_CLOTH_HELL','T8_ARMOR_CLOTH_HELL@1','T8_ARMOR_CLOTH_HELL@2','T8_ARMOR_CLOTH_HELL@3','T8_ARMOR_CLOTH_HELL@4']
+        elif self.selected_category == 'Тканевый шлем':
+            item_ids = ['T2_HEAD_CLOTH_SET1','T3_HEAD_CLOTH_SET1','T4_HEAD_CLOTH_SET1','T4_HEAD_CLOTH_SET1@1','T4_HEAD_CLOTH_SET1@2','T4_HEAD_CLOTH_SET1@3','T4_HEAD_CLOTH_SET1@4',
+                        'T5_HEAD_CLOTH_SET1','T5_HEAD_CLOTH_SET1@1','T5_HEAD_CLOTH_SET1@2','T5_HEAD_CLOTH_SET1@3','T5_HEAD_CLOTH_SET1@4',
+                        'T6_HEAD_CLOTH_SET1','T6_HEAD_CLOTH_SET1@1','T6_HEAD_CLOTH_SET1@2','T6_HEAD_CLOTH_SET1@3','T6_HEAD_CLOTH_SET1@4',
+                        'T7_HEAD_CLOTH_SET1','T7_HEAD_CLOTH_SET1@1','T7_HEAD_CLOTH_SET1@2','T7_HEAD_CLOTH_SET1@3','T7_HEAD_CLOTH_SET1@4',
+                        'T8_HEAD_CLOTH_SET1','T8_HEAD_CLOTH_SET1@1','T8_HEAD_CLOTH_SET1@2','T8_HEAD_CLOTH_SET1@3','T8_HEAD_CLOTH_SET1@4',
+                        'T4_HEAD_CLOTH_SET2','T4_HEAD_CLOTH_SET2@1','T4_HEAD_CLOTH_SET2@2','T4_HEAD_CLOTH_SET2@3','T4_HEAD_CLOTH_SET2@4',
+                        'T5_HEAD_CLOTH_SET2','T5_HEAD_CLOTH_SET2@1','T5_HEAD_CLOTH_SET2@2','T5_HEAD_CLOTH_SET2@3','T5_HEAD_CLOTH_SET2@4',
+                        'T6_HEAD_CLOTH_SET2','T6_HEAD_CLOTH_SET2@1','T6_HEAD_CLOTH_SET2@2','T6_HEAD_CLOTH_SET2@3','T6_HEAD_CLOTH_SET2@4',
+                        'T7_HEAD_CLOTH_SET2','T7_HEAD_CLOTH_SET2@1','T7_HEAD_CLOTH_SET2@2','T7_HEAD_CLOTH_SET2@3','T7_HEAD_CLOTH_SET2@4',
+                        'T8_HEAD_CLOTH_SET2','T8_HEAD_CLOTH_SET2@1','T8_HEAD_CLOTH_SET2@2','T8_HEAD_CLOTH_SET2@3','T8_HEAD_CLOTH_SET2@4',
+                        'T4_HEAD_CLOTH_SET3','T4_HEAD_CLOTH_SET3@1','T4_HEAD_CLOTH_SET3@2','T4_HEAD_CLOTH_SET3@3','T4_HEAD_CLOTH_SET3@4',
+                        'T5_HEAD_CLOTH_SET3','T5_HEAD_CLOTH_SET3@1','T5_HEAD_CLOTH_SET3@2','T5_HEAD_CLOTH_SET3@3','T5_HEAD_CLOTH_SET3@4',
+                        'T6_HEAD_CLOTH_SET3','T6_HEAD_CLOTH_SET3@1','T6_HEAD_CLOTH_SET3@2','T6_HEAD_CLOTH_SET3@3','T6_HEAD_CLOTH_SET3@4',
+                        'T7_HEAD_CLOTH_SET3','T7_HEAD_CLOTH_SET3@1','T7_HEAD_CLOTH_SET3@2','T7_HEAD_CLOTH_SET3@3','T7_HEAD_CLOTH_SET3@4',
+                        'T8_HEAD_CLOTH_SET3','T8_HEAD_CLOTH_SET3@1','T8_HEAD_CLOTH_SET3@2','T8_HEAD_CLOTH_SET3@3','T8_HEAD_CLOTH_SET3@4',
+                        'T4_HEAD_CLOTH_KEEPER','T4_HEAD_CLOTH_KEEPER@1','T4_HEAD_CLOTH_KEEPER@2','T4_HEAD_CLOTH_KEEPER@3','T4_HEAD_CLOTH_KEEPER@4',
+                        'T5_HEAD_CLOTH_KEEPER','T5_HEAD_CLOTH_KEEPER@1','T5_HEAD_CLOTH_KEEPER@2','T5_HEAD_CLOTH_KEEPER@3','T5_HEAD_CLOTH_KEEPER@4',
+                        'T6_HEAD_CLOTH_KEEPER','T6_HEAD_CLOTH_KEEPER@1','T6_HEAD_CLOTH_KEEPER@2','T6_HEAD_CLOTH_KEEPER@3','T6_HEAD_CLOTH_KEEPER@4',
+                        'T7_HEAD_CLOTH_KEEPER','T7_HEAD_CLOTH_KEEPER@1','T7_HEAD_CLOTH_KEEPER@2','T7_HEAD_CLOTH_KEEPER@3','T7_HEAD_CLOTH_KEEPER@4',
+                        'T8_HEAD_CLOTH_KEEPER','T8_HEAD_CLOTH_KEEPER@1','T8_HEAD_CLOTH_KEEPER@2','T8_HEAD_CLOTH_KEEPER@3','T8_HEAD_CLOTH_KEEPER@4',
+                        'T4_HEAD_CLOTH_HELL','T4_HEAD_CLOTH_HELL@1','T4_HEAD_CLOTH_HELL@2','T4_HEAD_CLOTH_HELL@3','T4_HEAD_CLOTH_HELL@4',
+                        'T5_HEAD_CLOTH_HELL','T5_HEAD_CLOTH_HELL@1','T5_HEAD_CLOTH_HELL@2','T5_HEAD_CLOTH_HELL@3','T5_HEAD_CLOTH_HELL@4',
+                        'T6_HEAD_CLOTH_HELL','T6_HEAD_CLOTH_HELL@1','T6_HEAD_CLOTH_HELL@2','T6_HEAD_CLOTH_HELL@3','T6_HEAD_CLOTH_HELL@4',
+                        'T7_HEAD_CLOTH_HELL','T7_HEAD_CLOTH_HELL@1','T7_HEAD_CLOTH_HELL@2','T7_HEAD_CLOTH_HELL@3','T7_HEAD_CLOTH_HELL@4',
+                        'T8_HEAD_CLOTH_HELL','T8_HEAD_CLOTH_HELL@1','T8_HEAD_CLOTH_HELL@2','T8_HEAD_CLOTH_HELL@3','T8_HEAD_CLOTH_HELL@4']
         return item_ids
 
     def get_premium(self, value):
@@ -217,10 +263,10 @@ class Albion_Helper(customtkinter.CTk):
         return tax
     
     def search(self, positive_profit_only=False):
-        tax = self.get_premium(self.selected_premium)
         if self.selected_server is None or self.selected_category is None or self.selected_premium is None:
-            CTkMessagebox.show(title="Информация", message="Вы должны выбрать категорию, сервер и ваш премиум статус!")
-
+            CTkMessagebox(self, title="Ошибка", message="Вы должны выбрать значения в:\n\nКатегория\nСервер\nПремиум", icon="cancel")
+            return
+        tax = self.get_premium(self.selected_premium)
         item_ids = self.get_category(self.selected_category)
         with open('item_names.json', 'r', encoding='utf-8') as file:
             translations = json.load(file)
@@ -314,8 +360,7 @@ class Albion_Helper(customtkinter.CTk):
     def search_in_background(self):
         t = threading.Thread(target=self.search, args=(True,))
         t.start()
-
+        
 if __name__ == "__main__":
     app = Loader()
-    # Start the Tkinter event loop
     app.mainloop()
