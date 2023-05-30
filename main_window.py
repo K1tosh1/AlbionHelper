@@ -1,12 +1,10 @@
 import customtkinter
-from tkinter import messagebox
 from CTkMessagebox import CTkMessagebox
 import requests
 from PIL import Image, ImageTk
 import json
 import concurrent.futures
 import threading
-from app_info import version
 import webbrowser
 
 class Loader(customtkinter.CTk):
