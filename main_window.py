@@ -103,7 +103,7 @@ class Albion_Helper(customtkinter.CTk):
         self.check_version()
 
     def check_version(self):
-        current_version = str(version)
+        current_version = '1.0'
         url = "https://raw.githubusercontent.com/K1tosh1/AlbionHelper/main/version.txt"
         try:
             response = requests.get(url)
