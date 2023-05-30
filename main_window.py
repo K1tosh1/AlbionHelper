@@ -7,8 +7,7 @@ import json
 import concurrent.futures
 import threading
 from app_info import version
-import time
-
+import webbrowser
 
 class Loader(customtkinter.CTk):
     def __init__(self):
@@ -21,7 +20,7 @@ class Loader(customtkinter.CTk):
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
-        window_width = 400
+        window_width = 300
         window_height = 120
 
         x = (screen_width - window_width) // 2
@@ -43,10 +42,11 @@ class Loader(customtkinter.CTk):
 
         progressbar.start()
 
-        self.after(5000, self.show_albion_helper)
+        self.after(3500, self.show_albion_helper)
+
     def show_albion_helper(self):
-        self.destroy()  # Закрыть Loader
-        Albion_Helper()  # Открыть Albion_Helper
+        self.destroy()
+        Albion_Helper()
 
 class Albion_Helper(customtkinter.CTk):
     def __init__(self):
@@ -104,9 +104,7 @@ class Albion_Helper(customtkinter.CTk):
 
     def check_version(self):
         current_version = str(version)
-
         url = "https://raw.githubusercontent.com/K1tosh1/AlbionHelper/main/version.txt"
-
         try:
             response = requests.get(url)
             if response.status_code == 200:
@@ -115,8 +113,13 @@ class Albion_Helper(customtkinter.CTk):
                     print("Версии совпадают")
                 else:
                     print("Версии не совпадают")
-                    CTkMessagebox(message="CTkMessagebox is successfully installed.",
-                        icon="check", option_1="Thanks")
+                    msg = CTkMessagebox(title="Обновление", message="Мы нашли новую версию, вы хотите перейти на страницу загрузки?",
+                        icon="question", option_2="Да", option_1="Нет")
+                    response = msg.get()
+                    if response=="Да":
+                        app.destroy()       
+                    else:
+                        print("Click 'Yes' to exit!")
             else:
                 print("Не удалось получить версию по ссылке")
         except requests.exceptions.RequestException as e:
