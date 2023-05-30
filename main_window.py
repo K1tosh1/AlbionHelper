@@ -7,6 +7,8 @@ import json
 import concurrent.futures
 import threading
 from app_info import version
+import time
+
 
 class Loader(customtkinter.CTk):
     def __init__(self):
@@ -41,8 +43,10 @@ class Loader(customtkinter.CTk):
 
         progressbar.start()
 
-
-
+        self.after(5000, self.show_albion_helper)
+    def show_albion_helper(self):
+        self.destroy()  # Закрыть Loader
+        Albion_Helper()  # Открыть Albion_Helper
 
 class Albion_Helper(customtkinter.CTk):
     def __init__(self):
@@ -96,6 +100,30 @@ class Albion_Helper(customtkinter.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
+        self.check_version()
+
+    def check_version(self):
+        current_version = str(version)
+
+        url = "https://raw.githubusercontent.com/K1tosh1/AlbionHelper/main/version.txt"
+
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                remote_version = response.text.strip()
+                if remote_version == current_version.strip():
+                    print("Версии совпадают")
+                else:
+                    print("Версии не совпадают")
+                    CTkMessagebox(message="CTkMessagebox is successfully installed.",
+                        icon="check", option_1="Thanks")
+            else:
+                print("Не удалось получить версию по ссылке")
+        except requests.exceptions.RequestException as e:
+            print("Ошибка при выполнении запроса:", str(e))
+
+        self.mainloop()
+    
     def get_server(self, value):
         self.selected_server = value
         if self.selected_server == "Западный":
@@ -105,6 +133,7 @@ class Albion_Helper(customtkinter.CTk):
             url = "https://east.albion-online-data.com/api/v2/stats/prices/"
             self.url = url
         return url
+
 
     def get_category(self, value):
         self.selected_category = value
