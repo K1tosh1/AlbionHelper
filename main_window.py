@@ -117,6 +117,7 @@ class Albion_Helper(customtkinter.CTk):
                         icon="question", option_2="Да", option_1="Нет")
                     response = msg.get()
                     if response=="Да":
+                        webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
                         app.destroy()       
                     else:
                         print("Click 'Yes' to exit!")
@@ -218,7 +219,7 @@ class Albion_Helper(customtkinter.CTk):
     def search(self, positive_profit_only=False):
         tax = self.get_premium(self.selected_premium)
         if self.selected_server is None or self.selected_category is None or self.selected_premium is None:
-            messagebox.showerror("Ошибка", "Выберите категорию, премиум статус и сервер!")
+            CTkMessagebox.show(title="Информация", message="Вы должны выбрать категорию, сервер и ваш премиум статус!")
 
         item_ids = self.get_category(self.selected_category)
         with open('item_names.json', 'r', encoding='utf-8') as file:
