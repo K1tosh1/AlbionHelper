@@ -1,7 +1,47 @@
 import customtkinter
 from tkinter import messagebox
+from CTkMessagebox import CTkMessagebox
 import requests
 from PIL import Image, ImageTk
+import json
+import concurrent.futures
+import threading
+from app_info import version
+
+class Loader(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Albion Helper")
+        self.resizable(False, False)
+        customtkinter.set_appearance_mode("dark")
+        self.overrideredirect(True)
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        window_width = 400
+        window_height = 120
+
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2
+
+        self.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
+        AppName = customtkinter.CTkLabel(self, text="Albion Helper")
+        AppName.grid(row=0, column=0, padx=10, pady=10)
+        AppName.configure(font=("Arial", 20))
+
+        loading = customtkinter.CTkLabel(self, text="Загрузка...")
+        loading.grid(row=2, column=0, padx=10, pady=10)
+
+        progressbar = customtkinter.CTkProgressBar(self, orientation="horizontal", mode='indeterminate')
+        progressbar.grid(row=1, column=0, pady=5, padx=5, sticky="nsew")
+
+        self.grid_columnconfigure(0, weight=1)
+
+        progressbar.start()
+
+
 
 
 class Albion_Helper(customtkinter.CTk):
@@ -14,7 +54,6 @@ class Albion_Helper(customtkinter.CTk):
         self.selected_premium = None
         self.url = None
 
-
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
 
@@ -26,14 +65,13 @@ class Albion_Helper(customtkinter.CTk):
 
         self.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-        # Left sidebar
         sidebar_width = 380
-        sidebar = customtkinter.CTkFrame(self, width=sidebar_width, fg_color="#222831")
+        sidebar = customtkinter.CTkFrame(self, width=sidebar_width)
         sidebar.grid(row=0, column=0, sticky="ns")
 
         label_category = customtkinter.CTkLabel(sidebar, text="Категория")
         label_category.grid(row=0, column=0)
-        category = customtkinter.CTkComboBox(sidebar, values=['Сумки'], state = 'readonly',command=self.get_category)
+        category = customtkinter.CTkComboBox(sidebar, values=['Аксессуары','Броня'], state = 'readonly',command=self.get_category)
         category.set(value="Выбери категорию")
         category.grid(row=2, column=0, pady=5,padx=5, sticky="nsew")
 
@@ -49,13 +87,11 @@ class Albion_Helper(customtkinter.CTk):
         premium.set(value="Премиум")
         premium.grid(row=6, column=0, pady=5, padx=5,sticky="nsew")
 
-        btn_search = customtkinter.CTkButton(sidebar, text="Поиск", command=self.search)
+        btn_search = customtkinter.CTkButton(sidebar, text="Поиск", command=self.search_in_background)
         btn_search.grid(row=7, column=0, padx=15, pady=15, sticky='nsew')
 
-
-        # Main content area
-        self.content = customtkinter.CTkScrollableFrame(self, fg_color="#393E46")
-        self.content.grid(row=0, column=1, sticky="nsew")
+        self.content = customtkinter.CTkScrollableFrame(self, border_width=1, border_color='#FEFDCA')
+        self.content.grid(row=0, column=1, padx=15, pady=15, sticky="nsew")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -65,44 +101,96 @@ class Albion_Helper(customtkinter.CTk):
         if self.selected_server == "Западный":
             url = "https://west.albion-online-data.com/api/v2/stats/prices/"
             self.url = url
-            print(url)
         elif self.selected_server == "Восточный":
             url = "https://east.albion-online-data.com/api/v2/stats/prices/"
             self.url = url
-            print(url)
         return url
 
     def get_category(self, value):
         self.selected_category = value
-        if self.selected_category == "Сумки":
+        if self.selected_category == "Аксессуары":
             item_ids = ['T2_BAG','T3_BAG','T4_BAG','T4_BAG@1','T4_BAG@2','T4_BAG@3','T4_BAG@4','T5_BAG','T5_BAG@1','T5_BAG@2','T5_BAG@3','T5_BAG@4',
                         'T6_BAG','T6_BAG@1','T6_BAG@2','T6_BAG@3','T6_BAG@4','T7_BAG','T7_BAG@1','T7_BAG@2','T7_BAG@3','T7_BAG@4','T8_BAG','T8_BAG@1',
                         'T8_BAG@2','T8_BAG@3','T8_BAG@4','T4_BAG_INSIGHT','T4_BAG_INSIGHT@1','T4_BAG_INSIGHT@2','T4_BAG_INSIGHT@3','T4_BAG_INSIGHT@4',
                         'T5_BAG_INSIGHT','T5_BAG_INSIGHT@1','T5_BAG_INSIGHT@2','T5_BAG_INSIGHT@3','T5_BAG_INSIGHT@4','T6_BAG_INSIGHT','T6_BAG_INSIGHT@1',
                         'T6_BAG_INSIGHT@2','T6_BAG_INSIGHT@3','T6_BAG_INSIGHT@4','T7_BAG_INSIGHT','T7_BAG_INSIGHT@1','T7_BAG_INSIGHT@2','T7_BAG_INSIGHT@3',
-                        'T7_BAG_INSIGHT@4','T8_BAG_INSIGHT','T8_BAG_INSIGHT@1','T8_BAG_INSIGHT@2','T8_BAG_INSIGHT@3','T8_BAG_INSIGHT@4']
-            print(item_ids)
-            return item_ids
+                        'T7_BAG_INSIGHT@4','T8_BAG_INSIGHT','T8_BAG_INSIGHT@1','T8_BAG_INSIGHT@2','T8_BAG_INSIGHT@3','T8_BAG_INSIGHT@4',
+                        'T2_CAPE','T3_CAPE','T4_CAPE','T4_CAPE@1','T4_CAPE@2','T4_CAPE@3','T4_CAPE@4','T5_CAPE','T5_CAPE@1','T5_CAPE@2','T5_CAPE@3','T5_CAPE@4',
+                        'T6_CAPE','T6_CAPE@1','T6_CAPE@2','T6_CAPE@3','T6_CAPE@4','T7_CAPE','T7_CAPE@1','T7_CAPE@2','T7_CAPE@3','T7_CAPE@4','T8_CAPE','T8_CAPE@1',
+                        'T8_CAPE@2','T8_CAPE@3','T8_CAPE@4','T4_CAPEITEM_DEMON','T4_CAPEITEM_DEMON@1','T4_CAPEITEM_DEMON@2','T4_CAPEITEM_DEMON@3','T4_CAPEITEM_DEMON@4',
+                        'T5_CAPEITEM_DEMON','T5_CAPEITEM_DEMON@1','T5_CAPEITEM_DEMON@2','T5_CAPEITEM_DEMON@3','T5_CAPEITEM_DEMON@4','T6_CAPEITEM_DEMON','T6_CAPEITEM_DEMON@1',
+                        'T6_CAPEITEM_DEMON@2','T6_CAPEITEM_DEMON@3','T6_CAPEITEM_DEMON@4','T7_CAPEITEM_DEMON','T7_CAPEITEM_DEMON@1','T7_CAPEITEM_DEMON@2','T7_CAPEITEM_DEMON@3',
+                        'T7_CAPEITEM_DEMON@4','T8_CAPEITEM_DEMON','T8_CAPEITEM_DEMON@1','T8_CAPEITEM_DEMON@2','T8_CAPEITEM_DEMON@3','T8_CAPEITEM_DEMON@4',
+                        'T4_CAPEITEM_FW_CAERLEON','T4_CAPEITEM_FW_CAERLEON@1','T4_CAPEITEM_FW_CAERLEON@2','T4_CAPEITEM_FW_CAERLEON@3','T4_CAPEITEM_FW_CAERLEON@4',
+                        'T5_CAPEITEM_FW_CAERLEON','T5_CAPEITEM_FW_CAERLEON@1','T5_CAPEITEM_FW_CAERLEON@2','T5_CAPEITEM_FW_CAERLEON@3','T5_CAPEITEM_FW_CAERLEON@4',
+                        'T6_CAPEITEM_FW_CAERLEON','T6_CAPEITEM_FW_CAERLEON@1','T6_CAPEITEM_FW_CAERLEON@2','T6_CAPEITEM_FW_CAERLEON@3','T6_CAPEITEM_FW_CAERLEON@4',
+                        'T7_CAPEITEM_FW_CAERLEON','T7_CAPEITEM_FW_CAERLEON@1','T7_CAPEITEM_FW_CAERLEON@2','T7_CAPEITEM_FW_CAERLEON@3','T7_CAPEITEM_FW_CAERLEON@4',
+                        'T8_CAPEITEM_FW_CAERLEON','T8_CAPEITEM_FW_CAERLEON@1','T8_CAPEITEM_FW_CAERLEON@2','T8_CAPEITEM_FW_CAERLEON@3','T8_CAPEITEM_FW_CAERLEON@4',
+                        'T4_CAPEITEM_FW_BRIDGEWATCH','T4_CAPEITEM_FW_BRIDGEWATCH@1','T4_CAPEITEM_FW_BRIDGEWATCH@2','T4_CAPEITEM_FW_BRIDGEWATCH@3','T4_CAPEITEM_FW_BRIDGEWATCH@4',
+                        'T5_CAPEITEM_FW_BRIDGEWATCH','T5_CAPEITEM_FW_BRIDGEWATCH@1','T5_CAPEITEM_FW_BRIDGEWATCH@2','T5_CAPEITEM_FW_BRIDGEWATCH@3','T5_CAPEITEM_FW_BRIDGEWATCH@4',
+                        'T6_CAPEITEM_FW_BRIDGEWATCH','T6_CAPEITEM_FW_BRIDGEWATCH@1','T6_CAPEITEM_FW_BRIDGEWATCH@2','T6_CAPEITEM_FW_BRIDGEWATCH@3','T6_CAPEITEM_FW_BRIDGEWATCH@4',
+                        'T7_CAPEITEM_FW_BRIDGEWATCH','T7_CAPEITEM_FW_BRIDGEWATCH@1','T7_CAPEITEM_FW_BRIDGEWATCH@2','T7_CAPEITEM_FW_BRIDGEWATCH@3','T7_CAPEITEM_FW_BRIDGEWATCH@4',
+                        'T8_CAPEITEM_FW_BRIDGEWATCH','T8_CAPEITEM_FW_BRIDGEWATCH@1','T8_CAPEITEM_FW_BRIDGEWATCH@2','T8_CAPEITEM_FW_BRIDGEWATCH@3','T8_CAPEITEM_FW_BRIDGEWATCH@4',
+                        'T4_CAPEITEM_FW_FORTSTERLING','T4_CAPEITEM_FW_FORTSTERLING@1','T4_CAPEITEM_FW_FORTSTERLING@2','T4_CAPEITEM_FW_FORTSTERLING@3','T4_CAPEITEM_FW_FORTSTERLING@4',
+                        'T5_CAPEITEM_FW_FORTSTERLING','T5_CAPEITEM_FW_FORTSTERLING@1','T5_CAPEITEM_FW_FORTSTERLING@2','T5_CAPEITEM_FW_FORTSTERLING@3','T5_CAPEITEM_FW_FORTSTERLING@4',
+                        'T6_CAPEITEM_FW_FORTSTERLING','T6_CAPEITEM_FW_FORTSTERLING@1','T6_CAPEITEM_FW_FORTSTERLING@2','T6_CAPEITEM_FW_FORTSTERLING@3','T6_CAPEITEM_FW_FORTSTERLING@4',
+                        'T7_CAPEITEM_FW_FORTSTERLING','T7_CAPEITEM_FW_FORTSTERLING@1','T7_CAPEITEM_FW_FORTSTERLING@2','T7_CAPEITEM_FW_FORTSTERLING@3','T7_CAPEITEM_FW_FORTSTERLING@4',
+                        'T8_CAPEITEM_FW_FORTSTERLING','T8_CAPEITEM_FW_FORTSTERLING@1','T8_CAPEITEM_FW_FORTSTERLING@2','T8_CAPEITEM_FW_FORTSTERLING@3','T8_CAPEITEM_FW_FORTSTERLING@4',
+                        'T4_CAPEITEM_FW_LYMHURST','T4_CAPEITEM_FW_LYMHURST@1','T4_CAPEITEM_FW_LYMHURST@2','T4_CAPEITEM_FW_LYMHURST@3','T4_CAPEITEM_FW_LYMHURST@4',
+                        'T5_CAPEITEM_FW_LYMHURST','T5_CAPEITEM_FW_LYMHURST@1','T5_CAPEITEM_FW_LYMHURST@2','T5_CAPEITEM_FW_LYMHURST@3','T5_CAPEITEM_FW_LYMHURST@4',
+                        'T6_CAPEITEM_FW_LYMHURST','T6_CAPEITEM_FW_LYMHURST@1','T6_CAPEITEM_FW_LYMHURST@2','T6_CAPEITEM_FW_LYMHURST@3','T6_CAPEITEM_FW_LYMHURST@4',
+                        'T7_CAPEITEM_FW_LYMHURST','T7_CAPEITEM_FW_LYMHURST@1','T7_CAPEITEM_FW_LYMHURST@2','T7_CAPEITEM_FW_LYMHURST@3','T7_CAPEITEM_FW_LYMHURST@4',
+                        'T8_CAPEITEM_FW_LYMHURST','T8_CAPEITEM_FW_LYMHURST@1','T8_CAPEITEM_FW_LYMHURST@2','T8_CAPEITEM_FW_LYMHURST@3','T8_CAPEITEM_FW_LYMHURST@4',
+                        'T4_CAPEITEM_FW_MARTLOCK','T4_CAPEITEM_FW_MARTLOCK@1','T4_CAPEITEM_FW_MARTLOCK@2','T4_CAPEITEM_FW_MARTLOCK@3','T4_CAPEITEM_FW_MARTLOCK@4',
+                        'T5_CAPEITEM_FW_MARTLOCK','T5_CAPEITEM_FW_MARTLOCK@1','T5_CAPEITEM_FW_MARTLOCK@2','T5_CAPEITEM_FW_MARTLOCK@3','T5_CAPEITEM_FW_MARTLOCK@4',
+                        'T6_CAPEITEM_FW_MARTLOCK','T6_CAPEITEM_FW_MARTLOCK@1','T6_CAPEITEM_FW_MARTLOCK@2','T6_CAPEITEM_FW_MARTLOCK@3','T6_CAPEITEM_FW_MARTLOCK@4',
+                        'T7_CAPEITEM_FW_MARTLOCK','T7_CAPEITEM_FW_MARTLOCK@1','T7_CAPEITEM_FW_MARTLOCK@2','T7_CAPEITEM_FW_MARTLOCK@3','T7_CAPEITEM_FW_MARTLOCK@4',
+                        'T8_CAPEITEM_FW_MARTLOCK','T8_CAPEITEM_FW_MARTLOCK@1','T8_CAPEITEM_FW_MARTLOCK@2','T8_CAPEITEM_FW_MARTLOCK@3','T8_CAPEITEM_FW_MARTLOCK@4',
+                        'T4_CAPEITEM_FW_THETFORD','T4_CAPEITEM_FW_THETFORD@1','T4_CAPEITEM_FW_THETFORD@2','T4_CAPEITEM_FW_THETFORD@3','T4_CAPEITEM_FW_THETFORD@4',
+                        'T5_CAPEITEM_FW_THETFORD','T5_CAPEITEM_FW_THETFORD@1','T5_CAPEITEM_FW_THETFORD@2','T5_CAPEITEM_FW_THETFORD@3','T5_CAPEITEM_FW_THETFORD@4',
+                        'T6_CAPEITEM_FW_THETFORD','T6_CAPEITEM_FW_THETFORD@1','T6_CAPEITEM_FW_THETFORD@2','T6_CAPEITEM_FW_THETFORD@3','T6_CAPEITEM_FW_THETFORD@4',
+                        'T7_CAPEITEM_FW_THETFORD','T7_CAPEITEM_FW_THETFORD@1','T7_CAPEITEM_FW_THETFORD@2','T7_CAPEITEM_FW_THETFORD@3','T7_CAPEITEM_FW_THETFORD@4',
+                        'T8_CAPEITEM_FW_THETFORD','T8_CAPEITEM_FW_THETFORD@1','T8_CAPEITEM_FW_THETFORD@2','T8_CAPEITEM_FW_THETFORD@3','T8_CAPEITEM_FW_THETFORD@4',
+                        'T4_CAPEITEM_HERETIC','T4_CAPEITEM_HERETIC@1','T4_CAPEITEM_HERETIC@2','T4_CAPEITEM_HERETIC@3','T4_CAPEITEM_HERETIC@4',
+                        'T5_CAPEITEM_HERETIC','T5_CAPEITEM_HERETIC@1','T5_CAPEITEM_HERETIC@2','T5_CAPEITEM_HERETIC@3','T5_CAPEITEM_HERETIC@4',
+                        'T6_CAPEITEM_HERETIC','T6_CAPEITEM_HERETIC@1','T6_CAPEITEM_HERETIC@2','T6_CAPEITEM_HERETIC@3','T6_CAPEITEM_HERETIC@4',
+                        'T7_CAPEITEM_HERETIC','T7_CAPEITEM_HERETIC@1','T7_CAPEITEM_HERETIC@2','T7_CAPEITEM_HERETIC@3','T7_CAPEITEM_HERETIC@4',
+                        'T8_CAPEITEM_HERETIC','T8_CAPEITEM_HERETIC@1','T8_CAPEITEM_HERETIC@2','T8_CAPEITEM_HERETIC@3','T8_CAPEITEM_HERETIC@4',
+                        'T4_CAPEITEM_KEEPER','T4_CAPEITEM_KEEPER@1','T4_CAPEITEM_KEEPER@2','T4_CAPEITEM_KEEPER@3','T4_CAPEITEM_KEEPER@4',
+                        'T5_CAPEITEM_KEEPER','T5_CAPEITEM_KEEPER@1','T5_CAPEITEM_KEEPER@2','T5_CAPEITEM_KEEPER@3','T5_CAPEITEM_KEEPER@4',
+                        'T6_CAPEITEM_KEEPER','T6_CAPEITEM_KEEPER@1','T6_CAPEITEM_KEEPER@2','T6_CAPEITEM_KEEPER@3','T6_CAPEITEM_KEEPER@4',
+                        'T7_CAPEITEM_KEEPER','T7_CAPEITEM_KEEPER@1','T7_CAPEITEM_KEEPER@2','T7_CAPEITEM_KEEPER@3','T7_CAPEITEM_KEEPER@4',
+                        'T8_CAPEITEM_KEEPER','T8_CAPEITEM_KEEPER@1','T8_CAPEITEM_KEEPER@2','T8_CAPEITEM_KEEPER@3','T8_CAPEITEM_KEEPER@4',
+                        'T4_CAPEITEM_MORGANA','T4_CAPEITEM_MORGANA@1','T4_CAPEITEM_MORGANA@2','T4_CAPEITEM_MORGANA@3','T4_CAPEITEM_MORGANA@4',
+                        'T5_CAPEITEM_MORGANA','T5_CAPEITEM_MORGANA@1','T5_CAPEITEM_MORGANA@2','T5_CAPEITEM_MORGANA@3','T5_CAPEITEM_MORGANA@4',
+                        'T6_CAPEITEM_MORGANA','T6_CAPEITEM_MORGANA@1','T6_CAPEITEM_MORGANA@2','T6_CAPEITEM_MORGANA@3','T6_CAPEITEM_MORGANA@4',
+                        'T7_CAPEITEM_MORGANA','T7_CAPEITEM_MORGANA@1','T7_CAPEITEM_MORGANA@2','T7_CAPEITEM_MORGANA@3','T7_CAPEITEM_MORGANA@4',
+                        'T8_CAPEITEM_MORGANA','T8_CAPEITEM_MORGANA@1','T8_CAPEITEM_MORGANA@2','T8_CAPEITEM_MORGANA@3','T8_CAPEITEM_MORGANA@4',
+                        'T4_CAPEITEM_UNDEAD','T4_CAPEITEM_UNDEAD@1','T4_CAPEITEM_UNDEAD@2','T4_CAPEITEM_UNDEAD@3','T4_CAPEITEM_UNDEAD@4',
+                        'T5_CAPEITEM_UNDEAD','T5_CAPEITEM_UNDEAD@1','T5_CAPEITEM_UNDEAD@2','T5_CAPEITEM_UNDEAD@3','T5_CAPEITEM_UNDEAD@4',
+                        'T6_CAPEITEM_UNDEAD','T6_CAPEITEM_UNDEAD@1','T6_CAPEITEM_UNDEAD@2','T6_CAPEITEM_UNDEAD@3','T6_CAPEITEM_UNDEAD@4',
+                        'T7_CAPEITEM_UNDEAD','T7_CAPEITEM_UNDEAD@1','T7_CAPEITEM_UNDEAD@2','T7_CAPEITEM_UNDEAD@3','T7_CAPEITEM_UNDEAD@4',
+                        'T8_CAPEITEM_UNDEAD','T8_CAPEITEM_UNDEAD@1','T8_CAPEITEM_UNDEAD@2','T8_CAPEITEM_UNDEAD@3','T8_CAPEITEM_UNDEAD@4']
+        elif self.selected_category == "Броня":
+            item_ids = ['']
+        return item_ids
 
     def get_premium(self, value):
         self.selected_premium = value
         if self.selected_premium == "Да":
             tax = 0.4
-            print(tax)
         elif self.selected_premium == "Нет":
             tax = 0.8
-            print(tax)
         return tax
     
-    def search(self):
-        print("Выбранный сервер:", self.selected_server)
-        print("Выбранная категория:", self.selected_category)
-        print("Премиум аккаунт:", self.selected_premium)
+    def search(self, positive_profit_only=False):
         tax = self.get_premium(self.selected_premium)
         if self.selected_server is None or self.selected_category is None or self.selected_premium is None:
             messagebox.showerror("Ошибка", "Выберите категорию, премиум статус и сервер!")
 
         item_ids = self.get_category(self.selected_category)
+        with open('item_names.json', 'r', encoding='utf-8') as file:
+            translations = json.load(file)
 
         strategy = []
 
@@ -110,7 +198,7 @@ class Albion_Helper(customtkinter.CTk):
 
         r = requests.get(self.url + ','.join(item_ids) + '?locations=' + ','.join(royal_cities) + '&qualities=1').json()
 
-        for item_id in item_ids:
+        def process_item(item_id):
             print('Анализ: '+item_id)
             best_buy_price = 9999999
             best_buy_city = ''
@@ -133,15 +221,21 @@ class Albion_Helper(customtkinter.CTk):
             raw_profit = (best_sell_price - best_buy_price)*100
             fees = best_sell_price * tax
 
-            strategy.append([item_id, best_buy_city, best_buy_price, best_sell_city, best_sell_price, best_sell_price - best_buy_price, raw_profit, fees, raw_profit - fees, (raw_profit - fees) / best_buy_price])
+            return [item_id, best_buy_city, best_buy_price, best_sell_city, best_sell_price, best_sell_price - best_buy_price, raw_profit, fees, raw_profit - fees, (raw_profit - fees) / best_buy_price]
 
-        # Sort the strategy list by profit (index 6, which is raw_profit)
-        strategy.sort(key=lambda x: x[6], reverse=True)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(process_item, item_ids)
+            for result in results:
+                if result is not None:
+                    strategy.append(result)
 
-        # Loop through the sorted strategy list
+            strategy.sort(key=lambda x: x[6], reverse=True)
+
         for index, item in enumerate(strategy):
             item_id, best_buy_city, best_buy_price, best_sell_city, best_sell_price, profit, raw_profit, fees, net_profit, profit_percentage = item
 
+            if positive_profit_only and net_profit <= 0:
+                continue
             item_frame = customtkinter.CTkFrame(self.content, height=74, border_width=1, border_color='#FEFDCA')
             item_frame.grid(row=index, column=0, pady=10, padx=10, sticky="nsew")
 
@@ -150,41 +244,45 @@ class Albion_Helper(customtkinter.CTk):
             image = image.resize((74, 74), Image.LANCZOS)
             tk_image = ImageTk.PhotoImage(image)
 
-            # Create a label widget to display the image
             item_image = customtkinter.CTkLabel(item_frame, image=tk_image, text='')
-            item_image.image = tk_image  # Keep a reference to prevent garbage collection
+            item_image.image = tk_image
             item_image.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-            # Configure grid weights to make item_frame expand horizontally
             self.content.grid_rowconfigure(index, weight=1)
             self.content.grid_columnconfigure(0, weight=1)
-
-            item_name = customtkinter.CTkLabel(item_frame, text='Предмет: '+item_id)
+            if item_id in translations:
+                translated_item_id = translations[item_id]
+            else:
+                translated_item_id = item_id
+            item_name = customtkinter.CTkLabel(item_frame, text=translated_item_id)
             item_name.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
             item_buy_city = customtkinter.CTkLabel(item_frame, text='Купить в '+str(best_buy_city))
             item_buy_city.grid(row=0, column=2, pady=5, sticky="nsew")
+
             item_buy_price = customtkinter.CTkLabel(item_frame, text='за '+str(best_buy_price)+'$')
             item_buy_price.grid(row=0, column=3, pady=5, padx=5, sticky="nsew")
+
             item_sell_city = customtkinter.CTkLabel(item_frame, text='Продать в '+str(best_sell_city))
             item_sell_city.grid(row=0, column=4, pady=5, sticky="nsew")
+
             item_sell_price = customtkinter.CTkLabel(item_frame, text='за '+str(best_sell_price)+'$')
             item_sell_price.grid(row=0, column=5, pady=5, padx=5, sticky="nsew")
-            
-            # Create item_profit label and set the text color based on profit
-            item_profit_text = 'Профит: ' + str(int(net_profit)) + '$' 
+
+            item_profit_text = 'Прибыль: ' + str(int(net_profit)) + '$'
             item_profit = customtkinter.CTkLabel(item_frame, text=item_profit_text)
             item_profit.grid(row=0, column=6, pady=10, padx=10, sticky="nsew")
-            
+
             if net_profit > 0:
                 item_profit.configure(text_color='green')
             else:
                 item_profit.configure(text_color='red')
 
-
-
-
+    def search_in_background(self):
+        t = threading.Thread(target=self.search, args=(True,))
+        t.start()
 
 if __name__ == "__main__":
-    app = Albion_Helper()
+    app = Loader()
+    # Start the Tkinter event loop
     app.mainloop()
