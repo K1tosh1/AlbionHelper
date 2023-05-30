@@ -99,30 +99,26 @@ class Albion_Helper(customtkinter.CTk):
         self.grid_columnconfigure(1, weight=1)
 
         self.check_version()
+        self.mainloop()
 
     def check_version(self):
-        current_version = 1.0
+        current_version = "1.0"
         url = "https://raw.githubusercontent.com/K1tosh1/AlbionHelper/main/version.txt"
-        try:
-            response = requests.get(url)
-            if response.status_code == 200:
-                remote_version = response.text
-                print(remote_version)
-                print(current_version)
-                if remote_version == current_version:
-                    print("Версия установлена")      
-            else:
+        response = requests.get(url)
+        if response.status_code == 200:
+            remote_version = response.text
+            print(remote_version)
+            print(current_version)
+            if remote_version == current_version:
+                print("Версия установлена")   
+            elif remote_version > current_version:
                 msg = CTkMessagebox(title="Обновление", message="Мы нашли новую версию, вы хотите перейти на страницу загрузки?",
                 icon="question", option_2="Да", option_1="Нет")
-                response = msg.get()
-                if response=="Да":
-                    webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
-                    app.destroy()
-
-        except requests.exceptions.RequestException as e:
-            print("Ошибка при выполнении запроса:", str(e))
-        self.mainloop()
-    
+                resp = msg.get()
+            if resp=="Да":
+                webbrowser.open('https://github.com/K1tosh1/AlbionHelper/releases')
+                app.destroy()
+                
     def get_server(self, value):
         self.selected_server = value
         if self.selected_server == "Западный":
