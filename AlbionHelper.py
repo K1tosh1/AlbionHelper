@@ -3,7 +3,7 @@ from PIL import ImageTk, Image
 import os, requests, json, ratelimit, time
 import tkinter as tk
 from tkinter import messagebox
-import datetime
+import threading
 
 
 class Albion_Helper(ctk.CTk):
@@ -15,7 +15,7 @@ class Albion_Helper(ctk.CTk):
         self.calculate_window_size()
         self.center_window()
         self.create_sidebar()
-        self.search_history = []
+        self.sidebar = ctk.CTkFrame(self, corner_radius=0) 
 
     # SETUP WINDOW SIZE
     def calculate_window_size(self):
@@ -103,12 +103,6 @@ class Albion_Helper(ctk.CTk):
     @ratelimit.limits(calls=180, period=60)
     def make_api_request(self, url):
         return requests.get(url).json()
-    
-    def show_error_message(self, message):
-        root = tk.Tk()
-        root.withdraw()
-        messagebox.showerror("Error", message)
-        root.destroy()
 
     def search(self):
         for item_frame in self.content.winfo_children():
@@ -133,7 +127,7 @@ class Albion_Helper(ctk.CTk):
             tax = 0.8
         
         selected_server = self.server_combobox.get().lower()
-        url = f"https://{selected_server}.albion-online-data.com/api/v2/stats/prices/{','.join(item_ids)}?locations={','.join(royal_cities)}&qualities=0"
+        url = f"https://{selected_server}.albion-online-data.com/api/v2/stats/prices/{','.join(item_ids)}?locations={','.join(royal_cities)}&qualities=1"
         
         try:
             r = self.make_api_request(url)
@@ -142,8 +136,7 @@ class Albion_Helper(ctk.CTk):
             wait_time = e.period_remaining + 1
             wait_minutes = int(wait_time / 60)
             wait_seconds = int(wait_time % 60)
-            message = f"API rate limit exceeded. Please wait for {wait_minutes} minutes and {wait_seconds} seconds."
-            self.show_error_message(message)
+            print(f"API rate limit exceeded. Please wait for {wait_minutes} minutes and {wait_seconds} seconds.")
             return
         
         with open("item_names.json", "r", encoding='utf-8') as json_file:
@@ -153,7 +146,6 @@ class Albion_Helper(ctk.CTk):
         sorted_results = []
 
         for item_id in item_ids:
-            print('Анализ: ' + item_id)
             best_buy_price = 9999999
             best_buy_city = ''
             best_sell_price = 0
@@ -196,7 +188,7 @@ class Albion_Helper(ctk.CTk):
                     "best_sell_price": best_sell_price,
                     "best_sell_city": best_sell_city,
                     "profit_after_tax": profit_after_tax,
-                    "item_image": item_image
+                    "item_image": item_image,
                 })
 
         selected_buy_city = self.buy_city_combobox.get()
@@ -223,7 +215,6 @@ class Albion_Helper(ctk.CTk):
             
             item_profit = ctk.CTkLabel(item_frame, text=f"Прибыль: {result['profit_after_tax']}$", text_color="#20ab1e", font=("Arial", 12))
             item_profit.grid(row=0, column=4, pady=6, padx=10)
-
 
 if __name__ == "__main__":
     app = Albion_Helper()
